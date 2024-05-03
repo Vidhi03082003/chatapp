@@ -1,6 +1,6 @@
 const User=require("../models/usermodel")
 const bcrypt = require("bcryptjs");
-const { generateTokenAndSetCookie } = require("../utils/generateToken");
+const jwt=require("jsonwebtoken")
 
 const signup=async (req,res)=>{
     try{
@@ -30,7 +30,9 @@ const signup=async (req,res)=>{
         })
 
         if(newUser){
-            generateTokenAndSetCookie(newUser._id,res)
+          const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
+            expiresIn: '15d'
+          });
             await newUser.save()
 
             
@@ -39,7 +41,8 @@ const signup=async (req,res)=>{
             _id:newUser._id,
             fullName:newUser.fullName,
             username:newUser.username,
-            profilePic:newUser.profilePic
+            profilePic:newUser.profilePic,
+            token:token
         })
         }
         else{
@@ -61,13 +64,18 @@ const login=async (req,res)=>{
             return res.status(400).json({error:"Invalid username or password"})
         }
 
-        generateTokenAndSetCookie(user._id,res);
+
+       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '15d'
+      });
+      
 
         res.status(201).json({
             _id:user._id,
             fullName:user.fullName,
             username:user.username,
-            profilePic:user.profilePic
+            profilePic:user.profilePic,
+            token:token
         })
     }catch(err){
         console.log("Error in login controller",err.message)
@@ -77,7 +85,7 @@ const login=async (req,res)=>{
 
 const logout=(req,res)=>{
     try{
-        res.cookie("jwt","",{maxAge:0})
+      //  res.cookie("jwt","",{maxAge:0})
         res.status(200).json({message:"Logged out successfully"})
     }catch(err){
         console.log("Error in logout controller",err.message)

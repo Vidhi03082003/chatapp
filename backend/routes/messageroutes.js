@@ -4,7 +4,7 @@ const {protectRoute}=require("../middleware/protectRoute")
 
 const router=express.Router();
 
-router.get("/:id",protectRoute,getMessages)
+router.post("/:id",protectRoute,getMessages)
 router.post("/send/:id",protectRoute,sendMessage)
 
 

@@ -5,10 +5,13 @@ const authRoutes=require("./routes/authroutes")
 const messageRoutes=require("./routes/messageroutes")
 const userRoutes=require("./routes/userroutes")
 const connectToMongoDB=require("./db/connectToMongoDB")
+const cors = require('cors');
 
-const app=express();
+const {app,server}=require('./socket/socket.js')
+
 dotenv.config()
 
+app.use(cors());
 app.use(express.json())
 app.use(cookieParser())
 
@@ -18,7 +21,7 @@ app.use("/api/users",userRoutes)
 
 const PORT=process.env.PORT || 5000
 
-app.listen(PORT,()=>{
+server.listen(PORT,()=>{
     connectToMongoDB()
     console.log(`Server started on Port ${PORT}`)
 })

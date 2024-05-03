@@ -1,5 +1,8 @@
+const { connections } = require("mongoose");
 const Conversation=require("../models/conversationModel")
-const Message=require("../models/messageModel")
+const Message=require("../models/messageModel");
+const { getReceiverSocketId,io } = require("../socket/socket");
+
 
 const sendMessage=async(req,res)=>{
     try{
@@ -30,6 +33,14 @@ const sendMessage=async(req,res)=>{
 
         //make them run in parallel
         await Promise.all([conversation.save(),newMessage.save()])
+
+
+        //Socketio functionality
+        const receiverSocketId=getReceiverSocketId(receiverId);
+        if(receiverSocketId){
+            // io.to is used to send events to the specific client
+            io.to(receiverSocketId).emit("newMessage",newMessage)
+        }
 
         res.status(201).json(newMessage)
 
